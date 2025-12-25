@@ -3,47 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
-<title>Eazeo | Find Food</title>
+<title>Eazeo | Food Court</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #FAFAFA; -webkit-tap-highlight-color: transparent; }
-  .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-  .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; }
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAFC; -webkit-tap-highlight-color: transparent; }
+  .hide-scroll::-webkit-scrollbar { display: none; }
+  .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); }
 </style>
 </head>
 <body class="pb-24">
 
-  <div class="glass sticky top-0 z-50 px-6 py-4 flex justify-between items-center transition-all duration-300" id="navbar">
+  <div class="glass sticky top-0 z-50 px-5 py-4 flex justify-between items-center border-b border-slate-100/50">
     <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Eazeo<span class="text-blue-600">.</span></h1>
-    <span class="text-[10px] bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider">Beta</span>
+    <span id="zone-badge" class="hidden text-[10px] bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Zone Mode</span>
   </div>
 
-  <div class="px-6 py-8 bg-white">
-    <h2 class="text-3xl font-extrabold text-slate-900 leading-tight">Find local <br><span class="text-blue-600">favorites.</span></h2>
-    
-    <div class="mt-6 relative group">
-      <input id="q" type="text" placeholder="Search dishes (e.g. Porotta, Tea)..." class="w-full p-4 pl-12 rounded-2xl border border-slate-100 bg-slate-50 text-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none shadow-sm">
-      <div class="absolute left-4 top-4 text-slate-400 group-focus-within:text-blue-500 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+  <div class="px-5 pt-6 pb-2">
+    <h2 class="text-3xl font-extrabold text-slate-900 leading-tight mb-6">What are you <br><span class="text-blue-600">craving?</span></h2>
+    <div class="relative group">
+      <input id="q" type="text" placeholder="Search for dishes..." class="w-full p-4 pl-12 rounded-2xl border-none bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] text-lg focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-slate-700 placeholder:text-slate-400">
+      <div class="absolute left-4 top-4 text-slate-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
       </div>
     </div>
   </div>
 
-  <div id="loading" class="loader" style="display:none;"></div>
-  <div id="results" class="px-5 space-y-3">
-    <div class="text-center py-20 text-slate-400 select-none">
-      <p class="text-sm font-medium">Type a dish to explore menus</p>
+  <div id="resto-feed" class="px-5 mt-8">
+    <div class="flex justify-between items-end mb-4">
+      <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Restaurants</h3>
+      <span class="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-lg" id="r-count">Loading...</span>
     </div>
+    <div id="resto-list" class="space-y-4"></div>
+  </div>
+
+  <div id="search-feed" class="px-5 mt-6 hidden">
+    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Matching Dishes</h3>
+    <div id="results" class="space-y-3"></div>
   </div>
 
   <script>
-    let items = [];
-    const loader = document.getElementById("loading");
+    let allItems = [];
+    let loadedRestos = [];
 
-    // ⚡️ Fisher-Yates Shuffle for Fairness
-    function shuffleArray(array) {
+    // --- 1. CONFIG & PARSING ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawRestos = urlParams.get('restos');
+    // If ?restos=1,2 is set, allowedIds = [1, 2]. Else null.
+    const allowedIds = rawRestos ? rawRestos.split(',').map(id => parseInt(id.trim())) : null;
+
+    if(allowedIds) document.getElementById('zone-badge').classList.remove('hidden');
+
+    // --- 2. LOGIC ---
+    function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
@@ -51,65 +63,87 @@
       return array;
     }
 
-    // Load Data
+    // --- 3. FETCH & RENDER ---
     fetch("restaurants.json")
       .then(r => r.json())
-      .then(async restos => {
-        // Randomize fetch order so no restaurant is favored
-        const shuffledRestos = shuffleArray([...restos]);
+      .then(async allData => {
+        // Filter based on URL params
+        const targetRestos = allowedIds ? allData.filter(r => allowedIds.includes(r.id)) : allData;
         
-        // Show loader if slow
-        // loader.style.display = 'block';
+        // Shuffle for fairness
+        loadedRestos = shuffle([...targetRestos]);
+        
+        // Render Restaurant Cards immediately
+        renderRestoList(loadedRestos);
 
-        const promises = shuffledRestos.map(r => 
+        // Background fetch menus for search
+        const promises = loadedRestos.map(r => 
           fetch(`https://opensheet.elk.sh/${r.sheetId}/menu`)
             .then(x => x.json())
             .then(data => {
               data.filter(i => i.Status === "Available").forEach(i => {
-                items.push({ 
-                  name: i.Item, 
-                  resto: r.name, 
-                  restoId: r.id 
-                });
+                allItems.push({ name: i.Item, resto: r.name, restoId: r.id });
               });
             })
-            .catch(err => console.error(`Failed to load ${r.name}`, err))
+            .catch(e => console.log("Skip", r.name))
         );
-
         await Promise.all(promises);
-        // loader.style.display = 'none';
       });
 
-    // Search Logic
+    function renderRestoList(list) {
+      const container = document.getElementById("resto-list");
+      document.getElementById("r-count").innerText = `${list.length} Nearby`;
+      
+      container.innerHTML = list.map((r, i) => `
+        <div onclick="location.href='resto.html?rid=${r.id}'" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between active:scale-[0.98] transition-transform cursor-pointer">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-xl">
+              ${['🍕','🍔','🥘','🍲','🍛'][i % 5]}
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-lg">${r.name}</h4>
+              <p class="text-xs text-slate-400 font-medium mt-0.5">View Menu & Order</p>
+            </div>
+          </div>
+          <div class="bg-slate-50 p-2 rounded-full text-slate-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // --- 4. SEARCH INTERACTION ---
     document.getElementById("q").oninput = e => {
       const q = e.target.value.toLowerCase().trim();
+      const rFeed = document.getElementById("resto-feed");
+      const sFeed = document.getElementById("search-feed");
       const out = document.getElementById("results");
-      
-      if(!q) { 
-        out.innerHTML = '<div class="text-center py-20 text-slate-400"><p class="text-sm font-medium">Type a dish to explore menus</p></div>'; 
-        return; 
-      }
-      
-      // Filter items (they are already randomly populated)
-      const res = items.filter(i => i.name.toLowerCase().includes(q));
-      
-      if(res.length === 0) {
-        out.innerHTML = '<div class="text-center py-10 text-slate-400">No dishes found.</div>';
+
+      if(!q) {
+        // Show Resto List, Hide Search
+        rFeed.classList.remove("hidden");
+        sFeed.classList.add("hidden");
         return;
       }
 
-      // Render Results
+      // Show Search, Hide Resto List
+      rFeed.classList.add("hidden");
+      sFeed.classList.remove("hidden");
+
+      const res = allItems.filter(i => i.name.toLowerCase().includes(q));
+
+      if(res.length === 0) {
+        out.innerHTML = '<div class="text-center py-10 text-slate-400 text-sm">No matching dishes found.</div>';
+        return;
+      }
+
       out.innerHTML = res.map(i => `
-        <div onclick="location.href='resto.html?rid=${i.restoId}'" class="bg-white p-5 rounded-2xl border border-slate-100 flex justify-between items-center active:scale-[0.98] transition-all cursor-pointer shadow-sm hover:shadow-md">
+        <div onclick="location.href='resto.html?rid=${i.restoId}'" class="bg-white p-4 rounded-xl border border-slate-100 flex justify-between items-center active:bg-slate-50 cursor-pointer">
           <div>
-            <h4 class="font-bold text-slate-900 text-[17px]">${i.name}</h4>
-            <div class="flex items-center gap-2 mt-1.5">
-               <span class="text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide">${i.resto}</span>
-            </div>
+            <h4 class="font-bold text-slate-800">${i.name}</h4>
+            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded mt-1 inline-block">${i.resto}</span>
           </div>
-          <div class="text-slate-300">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-          </div>
+          <svg class="text-slate-300" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       `).join('');
     };
