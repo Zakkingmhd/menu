@@ -9,12 +9,8 @@
 <style>
   body { font-family: 'Plus Jakarta Sans', sans-serif; background: #FAFAFA; -webkit-tap-highlight-color: transparent; }
   .hide-scroll::-webkit-scrollbar { display: none; }
-  /* Smooth Slide Up Animation */
-  .anim-enter { animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .anim-exit { animation: slideOut 0.25s ease-in forwards; }
-  @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  @keyframes slideOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100%); opacity: 0; } }
   
+  /* Animations */
   .glass-header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
   .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #f7f7f7 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
   @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
@@ -37,6 +33,7 @@
 
   <!-- Menu Feed -->
   <div id="menu-sections" class="px-4 mt-6 space-y-8 min-h-[60vh]">
+    <!-- Loading State -->
     <div class="space-y-4 pt-10">
         <div class="h-40 w-full bg-white rounded-2xl shimmer"></div>
         <div class="h-40 w-full bg-white rounded-2xl shimmer"></div>
@@ -66,25 +63,17 @@
     </div>
   </div>
 
-  <!-- Cart Modal (Sheet) -->
+  <!-- Cart Modal -->
   <div id="modal-bg" class="fixed inset-0 bg-slate-900/60 backdrop-blur-[4px] z-[60] opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeCart()"></div>
   <div id="modal-content" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[36px] z-[70] translate-y-full transition-transform duration-300 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col max-h-[85vh]">
-    
-    <!-- Drag Handle -->
     <div class="w-full flex justify-center pt-4 pb-2" onclick="closeCart()">
         <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
     </div>
-
-    <!-- Header -->
     <div class="px-6 pb-4 flex justify-between items-end border-b border-slate-50">
         <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight">Your Order</h3>
         <button onclick="closeCart()" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg mb-1">Add Items</button>
     </div>
-    
-    <!-- Scrollable Items -->
     <div id="cartItems" class="overflow-y-auto px-6 py-4 space-y-4"></div>
-    
-    <!-- Footer Action -->
     <div class="p-6 border-t border-slate-50 bg-white pb-8">
         <button onclick="checkout()" class="w-full bg-[#25D366] text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-500/20 active:scale-[0.98] transition-transform flex justify-center items-center gap-2">
           <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 3.401 3.482-.741a5.73 5.73 0 002.661.644h.001c3.181 0 5.768-2.586 5.768-5.766 0-3.18-2.587-5.766-5.768-5.766zm-5.773 10.372l-.17-.181c-1.396-1.545-1.597-2.186-1.597-3.63 0-4.162 3.385-7.548 7.548-7.548 4.162 0 7.548 3.386 7.548 7.548 0 4.163-3.386 7.548-7.548 7.548-1.594 0-2.484-.366-4.008-1.748l-.173-.146-2.502.536.852-2.333z"/></svg>
@@ -97,32 +86,27 @@
 // --- CONFIG ---
 const EAZEO_WHATSAPP = "919744103674"; 
 const rid = new URLSearchParams(location.search).get("rid");
-const CART_KEY = `eazeo_cart_${rid}`; // Unique cart per restaurant
+const CART_KEY = `eazeo_cart_${rid}`;
 
-let cart = {}; // { "DishName_Variant": { name, variant, price, qty, domId } }
+let cart = {}; 
 let resto = {};
 
 // --- INIT ---
-// 1. Load persisted cart
 try {
   const saved = localStorage.getItem(CART_KEY);
   if(saved) cart = JSON.parse(saved);
 } catch(e) {}
 
-// 2. Fetch Data
 fetch("restaurants.json").then(r=>r.json()).then(rs => {
   resto = rs.find(r => r.id == rid);
   if(!resto) return;
   document.getElementById("rname").innerText = resto.name;
-  
-  // Initial footer state check
   updateFooter();
 
   fetch(`https://opensheet.elk.sh/${resto.sheetId}/menu`)
     .then(x=>x.json())
     .then(data => {
       renderMenu(data.filter(i => i.Status === "Available"));
-      // Restore counters for saved items
       Object.values(cart).forEach(item => {
         renderCounter(item.domId, item.name, item.variant, item.price, item.qty);
       });
@@ -138,30 +122,34 @@ function renderMenu(menuData) {
   nav.innerHTML = "";
 
   cats.forEach((cat, idx) => {
-    // Elegant Pills
     nav.innerHTML += `<button onclick="document.getElementById('sec-${idx}').scrollIntoView({behavior:'smooth', block:'start'})" class="snap-start px-5 py-2.5 rounded-full border border-slate-100 text-[13px] font-bold text-slate-600 whitespace-nowrap bg-white shadow-sm hover:border-blue-200 hover:text-blue-600 transition-colors">${cat}</button>`;
 
     let html = `<div id="sec-${idx}" class="scroll-mt-40"><h3 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">${cat}</h3><div class="space-y-4">`;
     
     menuData.filter(i => (i.Category||"General") === cat).forEach(item => {
-      // Logic: Only show variants that exist and have price > 0
+      
+      // --- STRICT VARIANT FILTERING START ---
       const allVariantKeys = Object.keys(item).filter(k => k.includes("Price ("));
       let safeVars = [];
       
       if(allVariantKeys.length > 0) {
+        // We filter the KEYS first based on their values in the JSON
         safeVars = allVariantKeys
-          .map(k => k.match(/\((.*?)\)/)[1])
-          .filter(v => {
-             const p = item[`Price (${v})`];
-             return p && parseInt(String(p).replace(/\D/g,'')) > 0;
-          });
+          .filter(k => {
+             const rawVal = item[k]; // Get value, e.g., "100" or "" or "0"
+             if(!rawVal) return false; // Filter out null/undefined/empty string
+             const p = parseInt(String(rawVal).replace(/[^0-9]/g,'')); // Strip non-digits
+             return !isNaN(p) && p > 0; // Must be a real number greater than 0
+          })
+          .map(k => k.match(/\((.*?)\)/)[1]); // Extract name: "Price (Quarter)" -> "Quarter"
       } else {
-        // Fallback for flat pricing
+        // Fallback for sheets without "(Variant)" formatting
         if(item["Price (Full)"] && parseInt(item["Price (Full)"]) > 0) safeVars = ['Full'];
         else safeVars = ['Regular'];
       }
+      // --- STRICT VARIANT FILTERING END ---
 
-      if(safeVars.length === 0) return; // Skip invalid items
+      if(safeVars.length === 0) return; 
 
       html += `
       <div class="bg-white p-4 rounded-[20px] border border-slate-100 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.05)]">
@@ -178,7 +166,7 @@ function renderMenu(menuData) {
         <div class="flex flex-wrap gap-2.5">
           ${safeVars.map(v => {
             const price = parseInt(String(item[`Price (${v})`] || 0).replace(/\D/g,''));
-            const id = `${item.Item}_${v}`.replace(/[^a-zA-Z0-9]/g,''); // Sanitized ID
+            const id = `${item.Item}_${v}`.replace(/[^a-zA-Z0-9]/g,''); 
             return `
               <div id="btn-${id}" class="transition-all duration-200">
                 <button onclick="addFirst('${item.Item}', '${v}', ${price}, '${id}')" class="border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 active:scale-95 hover:bg-white hover:border-slate-300 transition-colors shadow-sm">
@@ -194,8 +182,7 @@ function renderMenu(menuData) {
   });
 }
 
-// --- CART ENGINE ---
-
+// --- CART & ACTIONS (Same as before) ---
 function addFirst(name, variant, price, id) {
   const key = `${name}_${variant}`;
   cart[key] = { name, variant, price, qty: 1, domId: id };
@@ -223,7 +210,6 @@ function renderCounter(domId, name, variant, price, qty) {
 function updateQty(name, variant, price, change, domId) {
   const key = `${name}_${variant}`;
   if (!cart[key]) return;
-
   cart[key].qty += change;
 
   if (cart[key].qty <= 0) {
@@ -232,20 +218,13 @@ function updateQty(name, variant, price, change, domId) {
   } else {
     renderCounter(domId, name, variant, price, cart[key].qty);
   }
-  
   saveCart();
   updateFooter();
-
-  // If Modal is open, refresh it live
   const modalContent = document.getElementById("modal-content");
-  if(modalContent.classList.contains("translate-y-0")) {
-    renderCartItems(); 
-  }
+  if(modalContent.classList.contains("translate-y-0")) renderCartItems(); 
 }
 
-function saveCart() {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
-}
+function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
 
 function updateFooter() {
   const count = Object.keys(cart).length;
@@ -271,8 +250,6 @@ function updateFooter() {
   }
 }
 
-// --- MODAL & CHECKOUT ---
-
 function contactResto() {
   const msg = `Hi, I'm looking at the menu of *${resto.name}* on Eazeo. Need some info.`;
   window.open(`https://wa.me/${EAZEO_WHATSAPP}?text=${encodeURIComponent(msg)}`);
@@ -281,12 +258,10 @@ function contactResto() {
 function renderCartItems() {
   const list = document.getElementById("cartItems");
   list.innerHTML = "";
-  
   if(Object.keys(cart).length === 0) {
     list.innerHTML = `<div class="text-center text-slate-400 py-10">Cart is empty</div>`;
     return;
   }
-
   Object.values(cart).forEach(item => {
     list.innerHTML += `
       <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
@@ -294,7 +269,6 @@ function renderCartItems() {
           <p class="font-bold text-slate-900 text-sm">${item.name}</p>
           <p class="text-xs text-slate-500 font-medium mt-1">${item.variant} &middot; ₹${item.price}</p>
         </div>
-        
         <div class="flex items-center gap-3 bg-white rounded-xl border border-slate-200 px-1 py-1 shadow-sm">
            <button onclick="updateQty('${item.name}', '${item.variant}', ${item.price}, -1, '${item.domId}')" class="w-7 h-7 flex items-center justify-center font-bold text-slate-400 hover:text-red-500 active:scale-90">-</button>
            <span class="text-sm font-bold w-4 text-center text-slate-900">${item.qty}</span>
@@ -307,10 +281,7 @@ function renderCartItems() {
 function openCart() {
   const bg = document.getElementById("modal-bg");
   const content = document.getElementById("modal-content");
-  
   renderCartItems();
-  
-  // Animate In
   bg.classList.remove("pointer-events-none", "opacity-0");
   bg.classList.add("opacity-100");
   content.classList.remove("translate-y-full");
@@ -320,7 +291,6 @@ function openCart() {
 function closeCart() { 
   const bg = document.getElementById("modal-bg");
   const content = document.getElementById("modal-content");
-  
   bg.classList.remove("opacity-100");
   bg.classList.add("opacity-0", "pointer-events-none");
   content.classList.remove("translate-y-0");
@@ -330,18 +300,12 @@ function closeCart() {
 function checkout() {
   let m = `*New Order @ ${resto.name}*%0A%0A`;
   let total = 0;
-  
   Object.values(cart).forEach(i => {
     const itemTotal = i.price * i.qty;
     total += itemTotal;
     m += `▪️ ${i.name} (${i.variant}) x ${i.qty} = ₹${itemTotal}%0A`;
   });
-  
   m += `%0A*Total Payable: ₹${total}*`;
-  
-  // Clear cart after order? Optional. Let's keep it for now in case they want to re-order/correct.
-  // localStorage.removeItem(CART_KEY); 
-  
   window.open(`https://wa.me/${EAZEO_WHATSAPP}?text=${m}`);
 }
 </script>
