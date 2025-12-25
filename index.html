@@ -49,7 +49,6 @@
     // --- 1. CONFIG & PARSING ---
     const urlParams = new URLSearchParams(window.location.search);
     const rawRestos = urlParams.get('restos');
-    // If ?restos=1,2 is set, allowedIds = [1, 2]. Else null.
     const allowedIds = rawRestos ? rawRestos.split(',').map(id => parseInt(id.trim())) : null;
 
     if(allowedIds) document.getElementById('zone-badge').classList.remove('hidden');
@@ -63,20 +62,37 @@
       return array;
     }
 
+    // Standard Levenshtein Distance for fuzzy matching
+    // Returns number of edits required to turn 'a' into 'b'
+    function levenshtein(a, b) {
+      const matrix = [];
+      for(let i=0; i<=b.length; i++) matrix[i] = [i];
+      for(let j=0; j<=a.length; j++) matrix[0][j] = j;
+
+      for(let i=1; i<=b.length; i++) {
+        for(let j=1; j<=a.length; j++) {
+          if(b.charAt(i-1) == a.charAt(j-1)) {
+            matrix[i][j] = matrix[i-1][j-1];
+          } else {
+            matrix[i][j] = Math.min(
+              matrix[i-1][j-1] + 1, // substitution
+              Math.min(matrix[i][j-1] + 1, matrix[i-1][j] + 1) // insertion/deletion
+            );
+          }
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
     // --- 3. FETCH & RENDER ---
     fetch("restaurants.json")
       .then(r => r.json())
       .then(async allData => {
-        // Filter based on URL params
         const targetRestos = allowedIds ? allData.filter(r => allowedIds.includes(r.id)) : allData;
-        
-        // Shuffle for fairness
         loadedRestos = shuffle([...targetRestos]);
         
-        // Render Restaurant Cards immediately
         renderRestoList(loadedRestos);
 
-        // Background fetch menus for search
         const promises = loadedRestos.map(r => 
           fetch(`https://opensheet.elk.sh/${r.sheetId}/menu`)
             .then(x => x.json())
@@ -120,24 +136,38 @@
       const out = document.getElementById("results");
 
       if(!q) {
-        // Show Resto List, Hide Search
         rFeed.classList.remove("hidden");
         sFeed.classList.add("hidden");
         return;
       }
 
-      // Show Search, Hide Resto List
       rFeed.classList.add("hidden");
       sFeed.classList.remove("hidden");
 
-      const res = allItems.filter(i => i.name.toLowerCase().includes(q));
+      // Filter Logic:
+      // 1. Direct Include match
+      // 2. Fuzzy match (Levenshtein distance < 3 for words > 3 chars)
+      const res = allItems.filter(i => {
+        const name = i.name.toLowerCase();
+        if(name.includes(q)) return true;
+        
+        // Fuzzy check: allow 2 errors for input length > 3
+        if(q.length > 2) {
+          // Check against the whole name or individual words in the name
+          const words = name.split(' ');
+          const isFuzzyMatch = words.some(w => levenshtein(w, q) <= 2) || levenshtein(name, q) <= 3;
+          return isFuzzyMatch;
+        }
+        return false;
+      });
 
       if(res.length === 0) {
         out.innerHTML = '<div class="text-center py-10 text-slate-400 text-sm">No matching dishes found.</div>';
         return;
       }
 
-      out.innerHTML = res.map(i => `
+      // Limit results to 20 for performance
+      out.innerHTML = res.slice(0, 20).map(i => `
         <div onclick="location.href='resto.html?rid=${i.restoId}'" class="bg-white p-4 rounded-xl border border-slate-100 flex justify-between items-center active:bg-slate-50 cursor-pointer">
           <div>
             <h4 class="font-bold text-slate-800">${i.name}</h4>
