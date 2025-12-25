@@ -3,263 +3,243 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
-<title>Menu | Eazeo</title>
+<title>Menu</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   body { font-family: 'Plus Jakarta Sans', sans-serif; background: #FAFAFA; -webkit-tap-highlight-color: transparent; }
   .hide-scroll::-webkit-scrollbar { display: none; }
-  .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-  .cart-anim { animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+  .anim-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
   @keyframes slideUp { from { transform: translate(0, 100%); } to { transform: translate(0, 0); } }
-  .active-cat { background-color: #1e293b; color: white; border-color: #1e293b; }
+  .active-cat { background-color: #0f172a; color: white; border-color: #0f172a; }
 </style>
 </head>
 <body class="pb-32">
 
-  <div class="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40">
-    <div class="px-5 py-4">
-      <div class="flex justify-between items-center mb-1">
-        <button onclick="history.back()" class="text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1 text-sm font-bold">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M15 19l-7-7 7-7"/></svg>
-          Back
-        </button>
-        <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Live</span>
-        </div>
-      </div>
-      <h1 id="rname" class="text-xl font-extrabold text-slate-900 leading-tight">Loading...</h1>
-    </div>
-
-    <div id="cat-container" class="flex gap-2 overflow-x-auto px-5 pb-3 hide-scroll snap-x">
-      </div>
+  <div class="bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40">
+    <div class="px-5 py-3 flex justify-between items-center">
+      <button onclick="history.back()" class="text-slate-500 font-bold text-sm flex items-center gap-1 py-2 pr-4">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+        Back
+      </button>
+      <h1 id="rname" class="text-lg font-extrabold text-slate-900 truncate max-w-[200px]">Menu</h1>
+      <div class="w-8"></div> </div>
+    
+    <div id="cat-container" class="flex gap-2 overflow-x-auto px-5 pb-3 hide-scroll"></div>
   </div>
 
-  <div id="menu-sections" class="px-4 mt-6 space-y-8">
+  <div id="menu-sections" class="px-4 mt-6 space-y-8 min-h-[60vh]">
     <div class="text-center py-20 text-slate-400">Loading Menu...</div>
   </div>
 
-  <div id="cartbar" onclick="openCart()" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-slate-900 text-white p-4 rounded-2xl shadow-2xl shadow-slate-900/20 hidden flex justify-between items-center cursor-pointer z-50 active:scale-[0.98] transition-transform duration-200">
-    <div class="flex items-center gap-3.5">
-      <div class="bg-white/10 w-11 h-11 rounded-xl flex items-center justify-center font-bold text-lg" id="item-count">0</div>
-      <div class="flex flex-col">
-        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest leading-none mb-0.5">Total</span>
-        <span class="text-lg font-bold leading-none">₹<span id="total">0</span></span>
-      </div>
+  <div id="footer-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 pb-8 z-50 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
+    <div id="btn-contact" class="hidden">
+      <button onclick="contactResto()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-xl active:scale-[0.98] transition-transform flex justify-center items-center gap-2">
+        <span>Contact Restaurant</span>
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      </button>
     </div>
-    <div class="flex items-center gap-2 font-bold text-sm bg-white text-slate-900 px-5 py-2.5 rounded-xl">
-      View Cart
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+
+    <div id="btn-checkout" class="hidden flex justify-between items-center bg-slate-900 text-white p-4 rounded-xl cursor-pointer active:scale-[0.98] transition-transform" onclick="openCart()">
+      <div class="flex items-center gap-3">
+        <div class="bg-white/20 w-10 h-10 rounded-lg flex items-center justify-center font-bold" id="total-qty">0</div>
+        <div>
+          <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Total</p>
+          <p class="text-lg font-bold leading-none">₹<span id="total-price">0</span></p>
+        </div>
+      </div>
+      <div class="font-bold text-sm bg-blue-600 px-4 py-2 rounded-lg">View Order</div>
     </div>
   </div>
 
-  <div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden transition-opacity duration-300">
-    <div class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[32px] p-6 pb-8 cart-anim shadow-2xl">
-      
-      <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 cursor-pointer" onclick="closeCart()"></div>
-      
-      <div class="flex justify-between items-end mb-6">
-        <h3 class="text-2xl font-extrabold text-slate-900">Your Order</h3>
-        <button onclick="closeCart()" class="text-slate-400 text-sm font-bold p-2">Close</button>
-      </div>
-
-      <div id="cartItems" class="space-y-4 mb-8 overflow-y-auto max-h-[45vh] pr-1"></div>
-
-      <div class="border-t border-dashed border-slate-200 pt-5 mb-6">
-        <div class="flex justify-between items-center">
-            <span class="text-slate-500 font-bold">Total Amount</span>
-            <span class="text-2xl font-extrabold text-slate-900">₹<span id="modalTotal">0</span></span>
-        </div>
-        <p class="text-xs text-slate-400 mt-2 text-center">Payment & delivery details will be confirmed on WhatsApp.</p>
-      </div>
-
-      <button onclick="checkout()" class="w-full bg-[#25D366] text-white py-4 rounded-2xl font-extrabold text-lg shadow-lg shadow-green-200 active:scale-[0.98] transition-all flex justify-center items-center gap-2">
-        <span>Place Order on WhatsApp</span>
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+  <div id="modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden">
+    <div class="fixed bottom-0 w-full bg-white rounded-t-[32px] p-6 pb-8 anim-up shadow-2xl">
+      <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6" onclick="closeCart()"></div>
+      <h3 class="text-xl font-extrabold text-slate-900 mb-6">Your Order</h3>
+      <div id="cartItems" class="space-y-4 mb-6 max-h-[40vh] overflow-y-auto"></div>
+      <button onclick="checkout()" class="w-full bg-[#25D366] text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-[0.98] transition-transform">
+        Send Order on WhatsApp
       </button>
     </div>
   </div>
 
 <script>
-// --- CONFIGURATION ---
-const EAZEO_WHATSAPP = "91XXXXXXXXXX"; // 👈 REPLACE WITH YOUR NUMBER
-
-const rid = new URLSearchParams(location.search).get("rid");
-let cart = {};
+// --- CONFIG ---
+const EAZEO_WHATSAPP = "91XXXXXXXXXX"; // Replace with your number
+let cart = {}; // Structure: { "DishName_Variant": { name, variant, price, qty } }
 let resto = {};
-let menuData = [];
 
-// --- INITIALIZATION ---
-fetch("restaurants.json")
-  .then(r => r.json())
-  .then(rs => {
-    resto = rs.find(r => r.id == rid);
-    if(!resto) return alert("Restaurant not found");
-    
-    document.getElementById("rname").innerText = resto.name;
-    document.title = `${resto.name} | Menu`;
-    
-    return fetch(`https://opensheet.elk.sh/${resto.sheetId}/menu`);
-  })
-  .then(r => r.json())
-  .then(data => {
-    menuData = data.filter(i => i.Status === "Available");
-    renderMenu();
-  })
-  .catch(e => {
-    document.getElementById("menu-sections").innerHTML = '<div class="text-center py-20 text-red-500">Failed to load menu. Please try again.</div>';
-  });
+// --- INIT ---
+const rid = new URLSearchParams(location.search).get("rid");
 
-// --- RENDER LOGIC ---
-function renderMenu() {
-  const categories = [...new Set(menuData.map(i => i.Category || "General"))];
-  const catNav = document.getElementById("cat-container");
-  const menuContainer = document.getElementById("menu-sections");
+fetch("restaurants.json").then(r=>r.json()).then(rs => {
+  resto = rs.find(r => r.id == rid);
+  if(!resto) return;
+  document.getElementById("rname").innerText = resto.name;
   
-  menuContainer.innerHTML = ''; // Clear loading state
+  // Show "Contact" button by default initially
+  updateFooter();
 
-  categories.forEach((cat, index) => {
-    // 1. Create Nav Pill
-    catNav.innerHTML += `
-      <button 
-        onclick="scrollToCat('sec-${index}', this)" 
-        class="cat-btn px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-500 bg-white whitespace-nowrap transition-all ${index===0 ? 'active-cat' : ''}">
-        ${cat}
-      </button>`;
-    
-    // 2. Create Menu Section
-    const items = menuData.filter(i => (i.Category || "General") === cat);
-    let sectionHtml = `
-      <div id="sec-${index}" class="pt-2 scroll-mt-32">
-        <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1 mb-4">${cat}</h3>
-        <div class="space-y-4">`;
-    
-    items.forEach(i => {
-      // Find variants
-      const vars = ['Full', 'Half', 'Quarter', 'Regular'].filter(v => i[`Price (${v})`]);
-      // If no explicit variants, assume "Regular" if "Price (Full)" exists or fallback
-      const cleanVars = vars.length ? vars : (i["Price (Full)"] ? ['Full'] : []);
+  fetch(`https://opensheet.elk.sh/${resto.sheetId}/menu`)
+    .then(x=>x.json())
+    .then(data => renderMenu(data.filter(i => i.Status === "Available")));
+});
 
-      sectionHtml += `
-        <div class="bg-white p-5 rounded-[20px] border border-slate-100 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)]">
-          <div class="flex justify-between gap-4">
-            <div class="flex-1">
-               <h4 class="font-bold text-slate-900 text-[17px] leading-snug">${i.Item}</h4>
-               <p class="text-xs text-slate-400 mt-1.5 font-medium">Freshly prepared.</p>
-            </div>
-            ${i.Image ? `<div class="w-20 h-20 shrink-0 rounded-2xl bg-slate-100 bg-cover bg-center border border-slate-100" style="background-image: url('${i.Image}')"></div>` : ''}
-          </div>
-          
-          <div class="mt-5 flex flex-wrap gap-2">
-            ${cleanVars.map(v => {
-               const p = i[`Price (${v})`];
-               const rawPrice = p ? p.toString().replace(/\D/g,'') : '0';
-               return `
-              <button 
-                onclick="pickVariant('${i.Item}', '${v}', ${rawPrice}, this)" 
-                class="variant-btn border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 transition-all active:scale-95 hover:border-blue-200">
-                ${v === 'Regular' || v === 'Full' && cleanVars.length === 1 ? 'Add' : v} <span class="ml-1 text-slate-900">₹${rawPrice}</span>
-              </button>`;
-            }).join('')}
-          </div>
-        </div>`;
+function renderMenu(menuData) {
+  const cats = [...new Set(menuData.map(i => i.Category || "General"))];
+  const nav = document.getElementById("cat-container");
+  const main = document.getElementById("menu-sections");
+  
+  main.innerHTML = "";
+
+  cats.forEach((cat, idx) => {
+    // Nav Pill
+    nav.innerHTML += `<button onclick="document.getElementById('sec-${idx}').scrollIntoView({behavior:'smooth'})" class="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-500 whitespace-nowrap bg-white">${cat}</button>`;
+
+    // Section
+    let html = `<div id="sec-${idx}" class="scroll-mt-36"><h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">${cat}</h3><div class="space-y-4">`;
+    
+    menuData.filter(i => (i.Category||"General") === cat).forEach(item => {
+      // Find variants (columns like 'Price (Full)', 'Price (Half)')
+      const variants = Object.keys(item).filter(k => k.includes("Price (")).map(k => k.match(/\((.*?)\)/)[1]);
+      const safeVars = variants.length ? variants : (item["Price (Full)"] ? ['Full'] : ['Regular']);
+
+      html += `
+      <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <div class="flex justify-between gap-4 mb-4">
+          <div><h4 class="font-bold text-slate-900 text-[17px]">${item.Item}</h4><p class="text-xs text-slate-400">Freshly prepared.</p></div>
+          ${item.Image ? `<div class="w-16 h-16 rounded-xl bg-slate-100 bg-cover bg-center" style="background-image: url('${item.Image}')"></div>` : ''}
+        </div>
+        <div class="flex flex-wrap gap-2">
+          ${safeVars.map(v => {
+            const price = parseInt(String(item[`Price (${v})`] || 0).replace(/\D/g,''));
+            const id = `${item.Item}_${v}`.replace(/\s+/g,''); // Safe ID
+            return `
+              <div id="btn-${id}" class="transition-all">
+                <button onclick="addFirst('${item.Item}', '${v}', ${price}, '${id}')" class="border border-slate-200 bg-slate-50 px-4 py-2 rounded-lg text-xs font-bold text-slate-600 active:scale-95">
+                  ${v} ₹${price}
+                </button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>`;
     });
-    
-    sectionHtml += `</div></div>`;
-    menuContainer.innerHTML += sectionHtml;
+    main.innerHTML += html + `</div></div>`;
   });
 }
 
-// --- CART ACTIONS ---
-function pickVariant(item, variant, price, btn) {
-  // Visual Feedback
-  const parent = btn.closest('div');
-  parent.querySelectorAll('button').forEach(b => {
-    b.className = "variant-btn border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 transition-all active:scale-95";
-  });
-  
-  // Active State
-  btn.className = "variant-btn border border-blue-600 bg-blue-600 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg shadow-blue-200 transition-all active:scale-95 transform scale-[1.02]";
+// --- CART LOGIC ---
 
-  // Add to cart logic (Overwrite if different variant selected for same item, or simple increment? 
-  // Simplified: Last selected variant wins for that item key to keep UI simple)
-  cart[item] = { variant, price, qty: 1 };
-  updateCartUI();
+// 1. First Add (Turns Button into Counter)
+function addFirst(name, variant, price, id) {
+  const key = `${name}_${variant}`;
+  cart[key] = { name, variant, price, qty: 1 };
+  
+  renderCounter(id, name, variant, price, 1);
+  updateFooter();
 }
 
-function updateCartUI() {
-  let count = 0, total = 0;
-  Object.values(cart).forEach(i => { count += i.qty; total += (i.qty * i.price); });
-  
-  document.getElementById("total").innerText = total;
-  document.getElementById("item-count").innerText = count;
-  document.getElementById("cartbar").style.display = total ? "flex" : "none";
+// 2. Render the +/- Counter
+function renderCounter(domId, name, variant, price, qty) {
+  const container = document.getElementById(`btn-${domId}`);
+  if(!container) return;
+
+  if (qty === 0) {
+    // Revert to simple button
+    container.innerHTML = `<button onclick="addFirst('${name}', '${variant}', ${price}, '${domId}')" class="border border-slate-200 bg-slate-50 px-4 py-2 rounded-lg text-xs font-bold text-slate-600 active:scale-95">${variant} ₹${price}</button>`;
+  } else {
+    // Show Counter
+    container.innerHTML = `
+      <div class="flex items-center bg-slate-900 text-white rounded-lg px-1 py-1 shadow-lg shadow-blue-200/50">
+        <button onclick="updateQty('${name}', '${variant}', ${price}, -1, '${domId}')" class="w-7 h-7 flex items-center justify-center font-bold text-lg active:scale-75 transition-transform">-</button>
+        <span class="text-xs font-bold w-4 text-center">${qty}</span>
+        <button onclick="updateQty('${name}', '${variant}', ${price}, 1, '${domId}')" class="w-7 h-7 flex items-center justify-center font-bold text-lg active:scale-75 transition-transform">+</button>
+      </div>`;
+  }
+}
+
+// 3. Update Quantity
+function updateQty(name, variant, price, change, domId) {
+  const key = `${name}_${variant}`;
+  if (!cart[key]) return;
+
+  cart[key].qty += change;
+
+  if (cart[key].qty <= 0) {
+    delete cart[key];
+    renderCounter(domId, name, variant, price, 0);
+  } else {
+    renderCounter(domId, name, variant, price, cart[key].qty);
+  }
+  updateFooter();
+}
+
+// 4. Footer State Management
+function updateFooter() {
+  const count = Object.keys(cart).length;
+  const contactBtn = document.getElementById("btn-contact");
+  const checkoutBtn = document.getElementById("btn-checkout");
+
+  if (count === 0) {
+    contactBtn.classList.remove("hidden");
+    checkoutBtn.classList.add("hidden");
+  } else {
+    contactBtn.classList.add("hidden");
+    checkoutBtn.classList.remove("hidden");
+    checkoutBtn.style.display = "flex"; // Force flex
+
+    // Calc totals
+    let totalQty = 0, totalPrice = 0;
+    Object.values(cart).forEach(item => {
+      totalQty += item.qty;
+      totalPrice += (item.qty * item.price);
+    });
+    document.getElementById("total-qty").innerText = totalQty;
+    document.getElementById("total-price").innerText = totalPrice;
+  }
+}
+
+// --- CHECKOUT FLOWS ---
+
+function contactResto() {
+  const msg = `Hi, I have selected *${resto.name}* on Eazeo and would like to know more about the menu or place an order.`;
+  window.open(`https://wa.me/${EAZEO_WHATSAPP}?text=${encodeURIComponent(msg)}`);
 }
 
 function openCart() {
-  const c = document.getElementById("cartItems");
-  c.innerHTML = "";
-  let total = 0;
+  const modal = document.getElementById("modal");
+  const list = document.getElementById("cartItems");
+  list.innerHTML = "";
   
-  // Generate Cart HTML
-  Object.entries(cart).forEach(([n,d]) => {
-    total += d.price * d.qty; // (qty is currently always 1 per item key in this simplified logic)
-    c.innerHTML += `
-      <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+  Object.values(cart).forEach(item => {
+    list.innerHTML += `
+      <div class="flex justify-between items-center border-b border-slate-50 pb-3 last:border-0">
         <div>
-          <p class="font-bold text-slate-800 text-sm">${n}</p>
-          <span class="text-[10px] bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-500 font-bold uppercase tracking-wider">${d.variant}</span>
+          <p class="font-bold text-slate-900">${item.name}</p>
+          <p class="text-xs text-slate-400">${item.variant} x ${item.qty}</p>
         </div>
-        <div class="flex items-center gap-3">
-           <button onclick="removeItem('${n}')" class="text-slate-400 hover:text-red-500 font-bold px-2">×</button>
-           <p class="font-black text-slate-900">₹${d.price}</p>
-        </div>
+        <p class="font-bold">₹${item.price * item.qty}</p>
       </div>`;
   });
-
-  document.getElementById("modalTotal").innerText = total;
-  document.getElementById("modal").classList.remove("hidden");
-  document.body.style.overflow = 'hidden'; // Lock background scroll
-}
-
-function removeItem(name) {
-  delete cart[name];
-  updateCartUI();
-  if(Object.keys(cart).length === 0) closeCart();
-  else openCart(); // Re-render modal
-}
-
-function closeCart() { 
-  document.getElementById("modal").classList.add("hidden");
-  document.body.style.overflow = ''; 
-}
-
-function scrollToCat(id, btn) {
-  document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
   
-  // Update Pills
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active-cat'));
-  btn.classList.add('active-cat');
+  modal.classList.remove("hidden");
 }
+
+function closeCart() { document.getElementById("modal").classList.add("hidden"); }
 
 function checkout() {
-  if(!Object.keys(cart).length) return;
-
-  let m = `*New Order via Eazeo*%0A`;
-  m += `*Restaurant:* ${resto.name} (ID: ${resto.id})%0A`;
-  m += `-----------------------------%0A`;
-  
+  let m = `*New Order: ${resto.name}*%0A%0A`;
   let total = 0;
-  Object.entries(cart).forEach(([n,d]) => {
-    total += d.price;
-    m += `▪️ ${n} (${d.variant}) - ₹${d.price}%0A`;
+  
+  Object.values(cart).forEach(i => {
+    const itemTotal = i.price * i.qty;
+    total += itemTotal;
+    m += `▪️ ${i.name} (${i.variant}) x ${i.qty} = ₹${itemTotal}%0A`;
   });
   
-  m += `-----------------------------%0A`;
-  m += `*Grand Total: ₹${total}*`;
-  
-  window.open(`https://wa.me/${EAZEO_WHATSAPP}?text=${m}`, '_blank');
+  m += `%0A*Total Payable: ₹${total}*`;
+  window.open(`https://wa.me/${EAZEO_WHATSAPP}?text=${m}`);
 }
 </script>
 </body>
