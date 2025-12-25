@@ -5,84 +5,128 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
 <title>Menu</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   body { font-family: 'Plus Jakarta Sans', sans-serif; background: #FAFAFA; -webkit-tap-highlight-color: transparent; }
   .hide-scroll::-webkit-scrollbar { display: none; }
-  .anim-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-  @keyframes slideUp { from { transform: translate(0, 100%); } to { transform: translate(0, 0); } }
-  .active-cat { background-color: #0f172a; color: white; border-color: #0f172a; }
+  /* Smooth Slide Up Animation */
+  .anim-enter { animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .anim-exit { animation: slideOut 0.25s ease-in forwards; }
+  @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes slideOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100%); opacity: 0; } }
+  
+  .glass-header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #f7f7f7 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 </style>
 </head>
-<body class="pb-32">
+<body class="pb-32 antialiased text-slate-900">
 
-  <div class="bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40">
-    <div class="px-5 py-3 flex justify-between items-center">
-      <button onclick="history.back()" class="text-slate-500 font-bold text-sm flex items-center gap-1 py-2 pr-4">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
-        Back
+  <!-- Header -->
+  <div class="glass-header border-b border-slate-100 sticky top-0 z-40 transition-shadow duration-300" id="header-el">
+    <div class="px-5 py-3 flex justify-between items-center h-[60px]">
+      <button onclick="history.back()" class="w-10 h-10 -ml-2 flex items-center justify-center text-slate-500 hover:bg-slate-50 rounded-full transition-colors">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <h1 id="rname" class="text-lg font-extrabold text-slate-900 truncate max-w-[200px]">Menu</h1>
-      <div class="w-8"></div> </div>
-    
-    <div id="cat-container" class="flex gap-2 overflow-x-auto px-5 pb-3 hide-scroll"></div>
+      <h1 id="rname" class="text-[17px] font-extrabold text-slate-900 truncate max-w-[200px] text-center">...</h1>
+      <div class="w-10"></div> 
+    </div>
+    <!-- Categories -->
+    <div id="cat-container" class="flex gap-3 overflow-x-auto px-5 pb-4 hide-scroll snap-x snap-mandatory"></div>
   </div>
 
+  <!-- Menu Feed -->
   <div id="menu-sections" class="px-4 mt-6 space-y-8 min-h-[60vh]">
-    <div class="text-center py-20 text-slate-400">Loading Menu...</div>
+    <div class="space-y-4 pt-10">
+        <div class="h-40 w-full bg-white rounded-2xl shimmer"></div>
+        <div class="h-40 w-full bg-white rounded-2xl shimmer"></div>
+    </div>
   </div>
 
-  <div id="footer-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 pb-8 z-50 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
-    <div id="btn-contact" class="hidden">
-      <button onclick="contactResto()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-xl active:scale-[0.98] transition-transform flex justify-center items-center gap-2">
+  <!-- Footer / Floating Action Button -->
+  <div id="footer-bar" class="fixed bottom-6 left-5 right-5 z-50">
+    <!-- Contact Btn -->
+    <div id="btn-contact" class="hidden shadow-xl shadow-slate-200/50 rounded-2xl">
+      <button onclick="contactResto()" class="w-full bg-[#0F172A] text-white font-bold py-4 rounded-2xl active:scale-[0.98] transition-all flex justify-center items-center gap-3">
         <span>Contact Restaurant</span>
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
       </button>
     </div>
 
-    <div id="btn-checkout" class="hidden flex justify-between items-center bg-slate-900 text-white p-4 rounded-xl cursor-pointer active:scale-[0.98] transition-transform" onclick="openCart()">
-      <div class="flex items-center gap-3">
-        <div class="bg-white/20 w-10 h-10 rounded-lg flex items-center justify-center font-bold" id="total-qty">0</div>
-        <div>
-          <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Total</p>
-          <p class="text-lg font-bold leading-none">₹<span id="total-price">0</span></p>
+    <!-- Checkout Btn -->
+    <div id="btn-checkout" class="hidden flex justify-between items-center bg-[#0F172A] text-white p-2 pr-2 pl-4 rounded-[20px] shadow-[0_20px_40px_-10px_rgba(15,23,42,0.4)] cursor-pointer active:scale-[0.98] transition-all" onclick="openCart()">
+      <div class="flex items-center gap-4">
+        <div class="bg-white/10 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border border-white/10" id="total-qty">0</div>
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider">Total</span>
+          <span class="text-lg font-bold leading-none">₹<span id="total-price">0</span></span>
         </div>
       </div>
-      <div class="font-bold text-sm bg-blue-600 px-4 py-2 rounded-lg">View Order</div>
+      <div class="font-bold text-sm bg-blue-600 px-6 py-3.5 rounded-2xl shadow-lg shadow-blue-600/30">View Cart</div>
     </div>
   </div>
 
-  <div id="modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden">
-    <div class="fixed bottom-0 w-full bg-white rounded-t-[32px] p-6 pb-8 anim-up shadow-2xl">
-      <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6" onclick="closeCart()"></div>
-      <h3 class="text-xl font-extrabold text-slate-900 mb-6">Your Order</h3>
-      <div id="cartItems" class="space-y-4 mb-6 max-h-[40vh] overflow-y-auto"></div>
-      <button onclick="checkout()" class="w-full bg-[#25D366] text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-[0.98] transition-transform">
-        Send Order on WhatsApp
-      </button>
+  <!-- Cart Modal (Sheet) -->
+  <div id="modal-bg" class="fixed inset-0 bg-slate-900/60 backdrop-blur-[4px] z-[60] opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeCart()"></div>
+  <div id="modal-content" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[36px] z-[70] translate-y-full transition-transform duration-300 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col max-h-[85vh]">
+    
+    <!-- Drag Handle -->
+    <div class="w-full flex justify-center pt-4 pb-2" onclick="closeCart()">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="px-6 pb-4 flex justify-between items-end border-b border-slate-50">
+        <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight">Your Order</h3>
+        <button onclick="closeCart()" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg mb-1">Add Items</button>
+    </div>
+    
+    <!-- Scrollable Items -->
+    <div id="cartItems" class="overflow-y-auto px-6 py-4 space-y-4"></div>
+    
+    <!-- Footer Action -->
+    <div class="p-6 border-t border-slate-50 bg-white pb-8">
+        <button onclick="checkout()" class="w-full bg-[#25D366] text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-500/20 active:scale-[0.98] transition-transform flex justify-center items-center gap-2">
+          <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 3.401 3.482-.741a5.73 5.73 0 002.661.644h.001c3.181 0 5.768-2.586 5.768-5.766 0-3.18-2.587-5.766-5.768-5.766zm-5.773 10.372l-.17-.181c-1.396-1.545-1.597-2.186-1.597-3.63 0-4.162 3.385-7.548 7.548-7.548 4.162 0 7.548 3.386 7.548 7.548 0 4.163-3.386 7.548-7.548 7.548-1.594 0-2.484-.366-4.008-1.748l-.173-.146-2.502.536.852-2.333z"/></svg>
+          Send to WhatsApp
+        </button>
     </div>
   </div>
 
 <script>
 // --- CONFIG ---
-const EAZEO_WHATSAPP = "919744103674"; // Replace with your number
-let cart = {}; // Structure: { "DishName_Variant": { name, variant, price, qty } }
+const EAZEO_WHATSAPP = "919744103674"; 
+const rid = new URLSearchParams(location.search).get("rid");
+const CART_KEY = `eazeo_cart_${rid}`; // Unique cart per restaurant
+
+let cart = {}; // { "DishName_Variant": { name, variant, price, qty, domId } }
 let resto = {};
 
 // --- INIT ---
-const rid = new URLSearchParams(location.search).get("rid");
+// 1. Load persisted cart
+try {
+  const saved = localStorage.getItem(CART_KEY);
+  if(saved) cart = JSON.parse(saved);
+} catch(e) {}
 
+// 2. Fetch Data
 fetch("restaurants.json").then(r=>r.json()).then(rs => {
   resto = rs.find(r => r.id == rid);
   if(!resto) return;
   document.getElementById("rname").innerText = resto.name;
   
-  // Show "Contact" button by default initially
+  // Initial footer state check
   updateFooter();
 
   fetch(`https://opensheet.elk.sh/${resto.sheetId}/menu`)
     .then(x=>x.json())
-    .then(data => renderMenu(data.filter(i => i.Status === "Available")));
+    .then(data => {
+      renderMenu(data.filter(i => i.Status === "Available"));
+      // Restore counters for saved items
+      Object.values(cart).forEach(item => {
+        renderCounter(item.domId, item.name, item.variant, item.price, item.qty);
+      });
+    });
 });
 
 function renderMenu(menuData) {
@@ -91,33 +135,54 @@ function renderMenu(menuData) {
   const main = document.getElementById("menu-sections");
   
   main.innerHTML = "";
+  nav.innerHTML = "";
 
   cats.forEach((cat, idx) => {
-    // Nav Pill
-    nav.innerHTML += `<button onclick="document.getElementById('sec-${idx}').scrollIntoView({behavior:'smooth'})" class="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-500 whitespace-nowrap bg-white">${cat}</button>`;
+    // Elegant Pills
+    nav.innerHTML += `<button onclick="document.getElementById('sec-${idx}').scrollIntoView({behavior:'smooth', block:'start'})" class="snap-start px-5 py-2.5 rounded-full border border-slate-100 text-[13px] font-bold text-slate-600 whitespace-nowrap bg-white shadow-sm hover:border-blue-200 hover:text-blue-600 transition-colors">${cat}</button>`;
 
-    // Section
-    let html = `<div id="sec-${idx}" class="scroll-mt-36"><h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">${cat}</h3><div class="space-y-4">`;
+    let html = `<div id="sec-${idx}" class="scroll-mt-40"><h3 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">${cat}</h3><div class="space-y-4">`;
     
     menuData.filter(i => (i.Category||"General") === cat).forEach(item => {
-      // Find variants (columns like 'Price (Full)', 'Price (Half)')
-      const variants = Object.keys(item).filter(k => k.includes("Price (")).map(k => k.match(/\((.*?)\)/)[1]);
-      const safeVars = variants.length ? variants : (item["Price (Full)"] ? ['Full'] : ['Regular']);
+      // Logic: Only show variants that exist and have price > 0
+      const allVariantKeys = Object.keys(item).filter(k => k.includes("Price ("));
+      let safeVars = [];
+      
+      if(allVariantKeys.length > 0) {
+        safeVars = allVariantKeys
+          .map(k => k.match(/\((.*?)\)/)[1])
+          .filter(v => {
+             const p = item[`Price (${v})`];
+             return p && parseInt(String(p).replace(/\D/g,'')) > 0;
+          });
+      } else {
+        // Fallback for flat pricing
+        if(item["Price (Full)"] && parseInt(item["Price (Full)"]) > 0) safeVars = ['Full'];
+        else safeVars = ['Regular'];
+      }
+
+      if(safeVars.length === 0) return; // Skip invalid items
 
       html += `
-      <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+      <div class="bg-white p-4 rounded-[20px] border border-slate-100 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.05)]">
         <div class="flex justify-between gap-4 mb-4">
-          <div><h4 class="font-bold text-slate-900 text-[17px]">${item.Item}</h4><p class="text-xs text-slate-400">Freshly prepared.</p></div>
-          ${item.Image ? `<div class="w-16 h-16 rounded-xl bg-slate-100 bg-cover bg-center" style="background-image: url('${item.Image}')"></div>` : ''}
+          <div class="flex-1">
+            <h4 class="font-bold text-slate-900 text-[16px] leading-snug">${item.Item}</h4>
+            <div class="flex items-center gap-1 mt-1">
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              <p class="text-xs text-slate-400 font-medium">Freshly prepared</p>
+            </div>
+          </div>
+          ${item.Image ? `<div class="w-20 h-20 rounded-2xl bg-slate-50 bg-cover bg-center shrink-0 border border-slate-50" style="background-image: url('${item.Image}')"></div>` : ''}
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-2.5">
           ${safeVars.map(v => {
             const price = parseInt(String(item[`Price (${v})`] || 0).replace(/\D/g,''));
-            const id = `${item.Item}_${v}`.replace(/\s+/g,''); // Safe ID
+            const id = `${item.Item}_${v}`.replace(/[^a-zA-Z0-9]/g,''); // Sanitized ID
             return `
-              <div id="btn-${id}" class="transition-all">
-                <button onclick="addFirst('${item.Item}', '${v}', ${price}, '${id}')" class="border border-slate-200 bg-slate-50 px-4 py-2 rounded-lg text-xs font-bold text-slate-600 active:scale-95">
-                  ${v} ₹${price}
+              <div id="btn-${id}" class="transition-all duration-200">
+                <button onclick="addFirst('${item.Item}', '${v}', ${price}, '${id}')" class="border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 active:scale-95 hover:bg-white hover:border-slate-300 transition-colors shadow-sm">
+                  ${v} <span class="text-slate-400 font-light mx-1">|</span> ₹${price}
                 </button>
               </div>
             `;
@@ -129,37 +194,32 @@ function renderMenu(menuData) {
   });
 }
 
-// --- CART LOGIC ---
+// --- CART ENGINE ---
 
-// 1. First Add (Turns Button into Counter)
 function addFirst(name, variant, price, id) {
   const key = `${name}_${variant}`;
-  cart[key] = { name, variant, price, qty: 1 };
-  
+  cart[key] = { name, variant, price, qty: 1, domId: id };
+  saveCart();
   renderCounter(id, name, variant, price, 1);
   updateFooter();
 }
 
-// 2. Render the +/- Counter
 function renderCounter(domId, name, variant, price, qty) {
   const container = document.getElementById(`btn-${domId}`);
-  if(!container) return;
+  if(!container) return; 
 
   if (qty === 0) {
-    // Revert to simple button
-    container.innerHTML = `<button onclick="addFirst('${name}', '${variant}', ${price}, '${domId}')" class="border border-slate-200 bg-slate-50 px-4 py-2 rounded-lg text-xs font-bold text-slate-600 active:scale-95">${variant} ₹${price}</button>`;
+    container.innerHTML = `<button onclick="addFirst('${name}', '${variant}', ${price}, '${domId}')" class="border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 active:scale-95 hover:bg-white hover:border-slate-300 transition-colors shadow-sm">${variant} <span class="text-slate-400 font-light mx-1">|</span> ₹${price}</button>`;
   } else {
-    // Show Counter
     container.innerHTML = `
-      <div class="flex items-center bg-slate-900 text-white rounded-lg px-1 py-1 shadow-lg shadow-blue-200/50">
-        <button onclick="updateQty('${name}', '${variant}', ${price}, -1, '${domId}')" class="w-7 h-7 flex items-center justify-center font-bold text-lg active:scale-75 transition-transform">-</button>
-        <span class="text-xs font-bold w-4 text-center">${qty}</span>
-        <button onclick="updateQty('${name}', '${variant}', ${price}, 1, '${domId}')" class="w-7 h-7 flex items-center justify-center font-bold text-lg active:scale-75 transition-transform">+</button>
+      <div class="flex items-center bg-[#0F172A] text-white rounded-xl px-1 py-1 shadow-lg shadow-blue-900/20 ring-2 ring-white">
+        <button onclick="updateQty('${name}', '${variant}', ${price}, -1, '${domId}')" class="w-8 h-8 flex items-center justify-center font-bold text-lg active:scale-75 transition-transform text-slate-300 hover:text-white">-</button>
+        <span class="text-xs font-bold w-5 text-center leading-none mt-0.5">${qty}</span>
+        <button onclick="updateQty('${name}', '${variant}', ${price}, 1, '${domId}')" class="w-8 h-8 flex items-center justify-center font-bold text-lg active:scale-75 transition-transform text-slate-300 hover:text-white">+</button>
       </div>`;
   }
 }
 
-// 3. Update Quantity
 function updateQty(name, variant, price, change, domId) {
   const key = `${name}_${variant}`;
   if (!cart[key]) return;
@@ -172,10 +232,21 @@ function updateQty(name, variant, price, change, domId) {
   } else {
     renderCounter(domId, name, variant, price, cart[key].qty);
   }
+  
+  saveCart();
   updateFooter();
+
+  // If Modal is open, refresh it live
+  const modalContent = document.getElementById("modal-content");
+  if(modalContent.classList.contains("translate-y-0")) {
+    renderCartItems(); 
+  }
 }
 
-// 4. Footer State Management
+function saveCart() {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
 function updateFooter() {
   const count = Object.keys(cart).length;
   const contactBtn = document.getElementById("btn-contact");
@@ -184,12 +255,12 @@ function updateFooter() {
   if (count === 0) {
     contactBtn.classList.remove("hidden");
     checkoutBtn.classList.add("hidden");
+    closeCart(); 
   } else {
     contactBtn.classList.add("hidden");
     checkoutBtn.classList.remove("hidden");
-    checkoutBtn.style.display = "flex"; // Force flex
+    checkoutBtn.style.display = "flex";
 
-    // Calc totals
     let totalQty = 0, totalPrice = 0;
     Object.values(cart).forEach(item => {
       totalQty += item.qty;
@@ -200,36 +271,64 @@ function updateFooter() {
   }
 }
 
-// --- CHECKOUT FLOWS ---
+// --- MODAL & CHECKOUT ---
 
 function contactResto() {
-  const msg = `Hi, I have selected *${resto.name}* on Eazeo and would like to know more about the menu or place an order.`;
+  const msg = `Hi, I'm looking at the menu of *${resto.name}* on Eazeo. Need some info.`;
   window.open(`https://wa.me/${EAZEO_WHATSAPP}?text=${encodeURIComponent(msg)}`);
 }
 
-function openCart() {
-  const modal = document.getElementById("modal");
+function renderCartItems() {
   const list = document.getElementById("cartItems");
   list.innerHTML = "";
   
+  if(Object.keys(cart).length === 0) {
+    list.innerHTML = `<div class="text-center text-slate-400 py-10">Cart is empty</div>`;
+    return;
+  }
+
   Object.values(cart).forEach(item => {
     list.innerHTML += `
-      <div class="flex justify-between items-center border-b border-slate-50 pb-3 last:border-0">
+      <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
         <div>
-          <p class="font-bold text-slate-900">${item.name}</p>
-          <p class="text-xs text-slate-400">${item.variant} x ${item.qty}</p>
+          <p class="font-bold text-slate-900 text-sm">${item.name}</p>
+          <p class="text-xs text-slate-500 font-medium mt-1">${item.variant} &middot; ₹${item.price}</p>
         </div>
-        <p class="font-bold">₹${item.price * item.qty}</p>
+        
+        <div class="flex items-center gap-3 bg-white rounded-xl border border-slate-200 px-1 py-1 shadow-sm">
+           <button onclick="updateQty('${item.name}', '${item.variant}', ${item.price}, -1, '${item.domId}')" class="w-7 h-7 flex items-center justify-center font-bold text-slate-400 hover:text-red-500 active:scale-90">-</button>
+           <span class="text-sm font-bold w-4 text-center text-slate-900">${item.qty}</span>
+           <button onclick="updateQty('${item.name}', '${item.variant}', ${item.price}, 1, '${item.domId}')" class="w-7 h-7 flex items-center justify-center font-bold text-blue-600 active:scale-90">+</button>
+        </div>
       </div>`;
   });
-  
-  modal.classList.remove("hidden");
 }
 
-function closeCart() { document.getElementById("modal").classList.add("hidden"); }
+function openCart() {
+  const bg = document.getElementById("modal-bg");
+  const content = document.getElementById("modal-content");
+  
+  renderCartItems();
+  
+  // Animate In
+  bg.classList.remove("pointer-events-none", "opacity-0");
+  bg.classList.add("opacity-100");
+  content.classList.remove("translate-y-full");
+  content.classList.add("translate-y-0");
+}
+
+function closeCart() { 
+  const bg = document.getElementById("modal-bg");
+  const content = document.getElementById("modal-content");
+  
+  bg.classList.remove("opacity-100");
+  bg.classList.add("opacity-0", "pointer-events-none");
+  content.classList.remove("translate-y-0");
+  content.classList.add("translate-y-full");
+}
 
 function checkout() {
-  let m = `*New Order: ${resto.name}*%0A%0A`;
+  let m = `*New Order @ ${resto.name}*%0A%0A`;
   let total = 0;
   
   Object.values(cart).forEach(i => {
@@ -239,6 +338,10 @@ function checkout() {
   });
   
   m += `%0A*Total Payable: ₹${total}*`;
+  
+  // Clear cart after order? Optional. Let's keep it for now in case they want to re-order/correct.
+  // localStorage.removeItem(CART_KEY); 
+  
   window.open(`https://wa.me/${EAZEO_WHATSAPP}?text=${m}`);
 }
 </script>
